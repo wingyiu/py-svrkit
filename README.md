@@ -39,10 +39,12 @@ class DemoService(Service):
         print(seq_id)
         return 0, 'yes!'
 
-application = Application(DemoService,
+# list of service prefix and service class pair
+services = [('demo', DemoService)]
+
+application = Application(services,
                           req_proto=MsgpackProto,
                           resp_proto=MsgpackProto,
-                          config={}
                           )
 
 if __name__ == '__main__':
@@ -58,7 +60,7 @@ if __name__ == '__main__':
 ````
 
 
-###2. call these method on client side like this
+###2. call these methods on client side like this
 
 ````
 import os
@@ -69,15 +71,18 @@ logging.basicConfig(level=logging.DEBUG)
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 from svrkit.rpc.client import Client
-from svrkit.protocol.json import JsonProto
+from svrkit.client import SvrkitClient
 from svrkit.protocol.msgpack import MsgpackProto
 
 if __name__ == '__main__':
+    # simple rpc client
     client = Client('localhost', '8080', 'demo', MsgpackProto, MsgpackProto)
     ret = client.echo(words=b'\xF0\xFF')
     print(ret)
 
-    ret2, data = client.svr(1)
+    # svrkit client which requires a seq_id.
+    client2 = SvrkitClient('client.ini')
+    ret2, data = client2.svr(seq_id=0)
     print(ret2)
     print(data)
 ````

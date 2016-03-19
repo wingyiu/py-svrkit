@@ -2,6 +2,7 @@
 import logging
 import urllib.request
 import urllib.error
+from svrkit.protocol.exception import ProtoDecodeException
 from svrkit.rpc.exception import *
 from svrkit.rpc.define import *
 from svrkit.protocol.json import JsonProto
@@ -29,7 +30,7 @@ class Client(object):
         :return:
         """
         #
-        req = {'*args': args, '**kwargs': kwargs}
+        req = {'args': args, 'kwargs': kwargs}
         # if no req_proto is suppled, default use json proto
         proto = self.req_proto if self.req_proto else JsonProto
         # encode to bytes
@@ -88,14 +89,21 @@ class Client(object):
             logger.error('remote call fail')
             raise SvrkitCallError()
         #
-        ret, data = self._decode_resp(resp_data)
+        try:
+            ret, data = self._decode_resp(resp_data)
+        except ProtoDecodeException:
+            raise SvrkitClientUnsupportedProto()
 
-        if ret == RET_METHOD_NOT_EXIST:
-            raise SvrkitMethodNotExist()
+        if ret == RET_UNSUPPORTED_METHOD:
+            raise SvrkitUnsupportedMethod()
         elif ret == RET_PARAMS_ERROR:
             raise SvrkitParamsError()
+        elif ret == RET_UNSUPPORTED_PROTO:
+            raise SvrkitRemoteUnsupportedProto()
+        elif ret == RET_UNSUPPORTED_SERVICE:
+            raise SvrkitUnsupportedService()
         elif ret == RET_ERROR:
-            raise SvrkitReturnError
+            raise SvrkitReturnError()
 
         return data
 

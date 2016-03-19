@@ -7,16 +7,17 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from svrkit.rpc.application import Application
-from svrkit.protocol.http import UrlEncodedForm
 from svrkit.protocol.json import JsonProto
 from svrkit.protocol.msgpack import MsgpackProto
 from svrkit.server.wsgi import WsgiApplication
 from demo.service import DemoService
 
-application = Application(DemoService,
+# list of service prefix and service class pair
+services = [('demo', DemoService)]
+
+application = Application(services,
                           req_proto=MsgpackProto,
                           resp_proto=MsgpackProto,
-                          config={}
                           )
 
 if __name__ == '__main__':

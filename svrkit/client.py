@@ -18,7 +18,6 @@ class SvrkitClient(Client):
         # read configuration from ini file
         self.config_path = config_path
         configs = self._parse_configs(config_path)
-        logger.debug('client configs: %s', configs)
         self.servers = configs['servers']
         #
         super().__init__(host=self.servers[0]['host'], port=self.servers[0]['port'], service=configs['service']['prefix'],
@@ -44,7 +43,6 @@ class SvrkitClient(Client):
         if 'servers' in parser:
             configs['servers'] = []
             section_keys = parser['servers']['keys'].split(', ')
-            print(section_keys)
             for sk in section_keys:
                 s = {}
                 s['host'] = parser[sk]['host']
@@ -55,7 +53,7 @@ class SvrkitClient(Client):
     def _get_req_url(self, method, *args, **kwargs):
         # seq_id
         seq_id = kwargs.get('seq_id', None)
-        if not seq_id:
+        if seq_id is None:
             seq_id = args[0]
         # TODO 如果seq_id不存在,抛出一个异常
         logger.debug('seq_id: %s', seq_id)

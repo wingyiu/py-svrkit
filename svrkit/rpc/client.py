@@ -55,7 +55,7 @@ class Client(object):
             ret = resp.get('RET')
             result = resp.get('DATA')
         except:
-            raise SvrkitReturnFormatError()
+            raise RpcReturnFormatError()
 
         return ret, result
 
@@ -84,26 +84,26 @@ class Client(object):
             resp_data = resp.read()
         except urllib.error.HTTPError as e:
             logger.error('remote call http error: %s', e.code)
-            raise SvrkitRemoteError()
+            raise RpcServerError()
         except:
             logger.error('remote call fail')
-            raise SvrkitCallError()
+            raise RpcCallError()
         #
         try:
             ret, data = self._decode_resp(resp_data)
         except ProtoDecodeException:
-            raise SvrkitClientUnsupportedProto()
+            raise RpcClientUnsupportedProto()
 
         if ret == RET_UNSUPPORTED_METHOD:
-            raise SvrkitUnsupportedMethod()
+            raise RpcUnsupportedMethod()
         elif ret == RET_PARAMS_ERROR:
-            raise SvrkitParamsError()
+            raise RpcParamsError()
         elif ret == RET_UNSUPPORTED_PROTO:
-            raise SvrkitRemoteUnsupportedProto()
+            raise RpcServerUnsupportedProto()
         elif ret == RET_UNSUPPORTED_SERVICE:
-            raise SvrkitUnsupportedService()
+            raise RpcUnsupportedService()
         elif ret == RET_ERROR:
-            raise SvrkitReturnError()
+            raise RpcReturnError()
 
         return data
 

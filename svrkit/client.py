@@ -5,7 +5,8 @@ import configparser
 from svrkit.rpc.client import Client
 from svrkit.protocol.msgpack import MsgpackProto
 from svrkit.protocol.json import JsonProto
-from svrkit.rpc.exception import SvrkitUnsupportedProto
+from svrkit.rpc.exception import RpcUnsupportedProto
+from svrkit.exception import SvrkitSeqIdMissingException
 
 logger = logging.getLogger('svrkit')
 
@@ -39,7 +40,7 @@ class SvrkitClient(Client):
                 configs['proto']['req'] = globals()[parser['proto']['req']]
                 configs['proto']['resp'] = globals()[parser['proto']['resp']]
             except KeyError:
-                raise SvrkitUnsupportedProto()
+                raise RpcUnsupportedProto()
         if 'servers' in parser:
             configs['servers'] = []
             section_keys = parser['servers']['keys'].split(', ')
@@ -54,8 +55,7 @@ class SvrkitClient(Client):
         # seq_id
         seq_id = kwargs.get('seq_id', None)
         if seq_id is None:
-            seq_id = args[0]
-        # TODO 如果seq_id不存在,抛出一个异常
+            raise SvrkitSeqIdMissingException()
         logger.debug('seq_id: %s', seq_id)
         server_count = len(self.servers)
         idx = abs(hash(seq_id)) % server_count

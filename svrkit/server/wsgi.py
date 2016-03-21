@@ -7,9 +7,9 @@ class WsgiApplication(object):
 
     """
 
-    def __init__(self, application):
+    def __init__(self, service):
         super().__init__()
-        self.application = application
+        self.service = service
 
     def __call__(self, environ, start_response):
         # get the request serivce and the method
@@ -25,7 +25,7 @@ class WsgiApplication(object):
         logger.debug('request body: %s', request_body)
 
         # invoke the method and get return
-        response_body = self.application.handle_call(service_prefix, method, request_body)
+        response_body = self.service.handle_call(service_prefix, method, request_body)
         response_body_len = str(len(response_body))
         logger.debug('response data: %s', response_body)
         logger.debug('response data length: %s', response_body_len)

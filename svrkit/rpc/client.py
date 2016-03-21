@@ -12,8 +12,10 @@ logger = logging.getLogger('svrkit.client')
 
 class Client(object):
     """
-    rpc client
+    rpc client(base on http)
     """
+
+    # TODO 抽取一个更加通用的Client,使能适用除HTTP意外的传输协议
 
     def __init__(self, host, port, service, req_proto, resp_proto):
         self.host = host
@@ -59,12 +61,12 @@ class Client(object):
 
         return ret, result
 
-    def _build_req_url(self, host, port, service, method):
-        url = 'http://{}:{}/{}/{}'.format(host, port, service, method)
-        return url
+    def _get_server(self, service, method, *args, **kwargs):
+        return self.host, self.port
 
-    def _get_req_url(self, method, *args, **kwargs):
-        url = self._build_req_url(self.host, self.port, self.service, method)
+    def _get_req_url(self, service, method, *args, **kwargs):
+        host, port = self._get_server(service, method, *args, **kwargs)
+        url = 'http://{}:{}/{}/{}'.format(host, port, service, method)
         return url
 
     def _remote_call(self, method, *args, **kwargs):
@@ -72,7 +74,8 @@ class Client(object):
         req_data = self._encode_req(*args, **kwargs)
         data_len = len(req_data)
 
-        url = self._get_req_url(method, *args, **kwargs)
+        # START HTTP特有的实现
+        url = self._get_req_url(self.service, method, *args, **kwargs)
         req = urllib.request.Request(url, req_data)
         req.add_header('Cache-Control', 'no-cache')
         req.add_header('Content-Length', '%d' % data_len)
@@ -88,6 +91,7 @@ class Client(object):
         except:
             logger.error('remote call fail')
             raise RpcCallError()
+        # END
         #
         try:
             ret, data = self._decode_resp(resp_data)

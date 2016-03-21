@@ -12,7 +12,7 @@ logger = logging.getLogger('svrkit')
 
 class SvrkitClient(Client):
     """
-    a client that use the `seq_id` to select the target server
+    a client that use the `seq_id` in `kwargs` to select the target server
     """
 
     def __init__(self, config_path):
@@ -51,7 +51,7 @@ class SvrkitClient(Client):
                 configs['servers'].append(s)
         return configs
 
-    def _get_req_url(self, method, *args, **kwargs):
+    def _get_server(self, service, method, *args, **kwargs):
         # seq_id
         seq_id = kwargs.get('seq_id', None)
         if seq_id is None:
@@ -61,6 +61,5 @@ class SvrkitClient(Client):
         idx = abs(hash(seq_id)) % server_count
         selected_server = self.servers[idx]
         logger.debug('selected server: [%d] %s:%s', idx, selected_server['host'], selected_server['port'])
-        #
-        url = self._build_req_url(selected_server['host'], selected_server['port'], self.service, method)
-        return url
+        return selected_server['host'], selected_server['port']
+

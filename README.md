@@ -2,7 +2,7 @@
 just another square wheel
 
 ## what is this wheel?
-1.a `rpc` based on `wsgi`
+1.a `rpc` based on `HTTP`
 
 2.a `svrkit` based on the `rpc` mentioned in `1.`
 
@@ -21,16 +21,14 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../..
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-from svrkit.rpc.application import Application
 from svrkit.protocol.json import JsonProto
 from svrkit.protocol.msgpack import MsgpackProto
 from svrkit.server.wsgi import WsgiApplication
 from svrkit.rpc.service import Service
 
-
 class DemoService(Service):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, prefix, req_proto, resp_proto):
+        super().__init__(prefix, req_proto, resp_proto)
 
     def echo(self, words):
         return words
@@ -39,13 +37,8 @@ class DemoService(Service):
         print(seq_id)
         return 0, 'yes!'
 
-# list of service prefix and service class pair
-services = [('demo', DemoService)]
 
-application = Application(services,
-                          req_proto=MsgpackProto,
-                          resp_proto=MsgpackProto,
-                          )
+service = DemoService('demo', req_proto=MsgpackProto, resp_proto=MsgpackProto)
 
 if __name__ == '__main__':
     # You can use any Wsgi server. Here, we chose
@@ -53,7 +46,7 @@ if __name__ == '__main__':
     # supposed to use it in production.
     from wsgiref.simple_server import make_server
 
-    wsgi_app = WsgiApplication(application)
+    wsgi_app = WsgiApplication(service)
     # read configure from
     server = make_server('0.0.0.0', 8080, wsgi_app)
     server.serve_forever()

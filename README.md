@@ -7,7 +7,7 @@ just another square wheel
 2.a `svrkit` based on the `rpc` mentioned in `1.`
 
 ## what is svrkit?
-something used in `Wechat`.
+something used in `Wechat`, which use an `seq_id` to selected server(`Load Balancing`) in the client side.
 
 ## how to use it?
 

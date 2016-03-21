@@ -18,16 +18,17 @@ class SvrkitClient(Client):
     def __init__(self, config_path):
         # read configuration from ini file
         self.config_path = config_path
-        configs = self._parse_configs(config_path)
-        self.servers = configs['servers']
+        self.parser = configparser.ConfigParser()
+        self.parser.read(config_path)
+        # only parse svrkit related configs
+        svrkit_configs = self._parse_svrkit_configs(self.parser)
+        self.servers = svrkit_configs['servers']
         #
-        super().__init__(host=self.servers[0]['host'], port=self.servers[0]['port'], service=configs['service']['prefix'],
-                         req_proto=configs['proto']['req'],
-                         resp_proto=configs['proto']['resp'])
+        super().__init__(host=self.servers[0]['host'], port=self.servers[0]['port'], service=svrkit_configs['service']['prefix'],
+                         req_proto=svrkit_configs['proto']['req'],
+                         resp_proto=svrkit_configs['proto']['resp'])
 
-    def _parse_configs(self, config_path):
-        parser = configparser.ConfigParser()
-        parser.read(config_path)
+    def _parse_svrkit_configs(self, parser):
         configs = {}
         if 'service' in parser:
             configs['service'] = {}

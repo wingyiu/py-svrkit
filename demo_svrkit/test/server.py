@@ -7,18 +7,11 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
-from svrkit.rpc.service import Service
-from svrkit.protocol.json import JsonProto
-from svrkit.protocol.msgpack import MsgpackProto
 from svrkit.server.wsgi import WsgiApplication
-from demo.service import DemoService
+from demo_svrkit.service import DemoSvrkitService
 
-# list of service prefix and service class pair
 
-service = DemoService('demo',
-                      req_proto=MsgpackProto,
-                      resp_proto=MsgpackProto,
-                      )
+service = DemoSvrkitService('service.ini')
 
 if __name__ == '__main__':
     # You can use any Wsgi server. Here, we chose
@@ -27,6 +20,5 @@ if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
     wsgi_app = WsgiApplication(service)
-    # read configure from
-    server = make_server('0.0.0.0', 8080, wsgi_app)
+    server = make_server('0.0.0.0', 8081, wsgi_app)
     server.serve_forever()

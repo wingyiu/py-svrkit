@@ -1,0 +1,11 @@
+syntax = "proto3";
+package svrkit;
+
+message RequestWrapper {
+	bytes request = 1;
+}
+
+message ResponseWrapper {
+	uint64 RET = 1;
+	bytes DATA = 2;
+}

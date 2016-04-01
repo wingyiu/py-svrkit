@@ -27,7 +27,7 @@ class MsgpackProto(Proto):
     def __init__(self):
         super().__init__()
 
-    def encode(self, data):
+    def encode(self, data, is_req=False):
         try:
             # TODO support complex like datetime
             binary = msgpack.packb(data, use_bin_type=True, default=encode_default)
@@ -35,7 +35,7 @@ class MsgpackProto(Proto):
             raise ProtoEncodeException()
         return binary
 
-    def decode(self, binary):
+    def decode(self, binary, is_req=False):
         try:
             # TODO support complex like datetime
             data = msgpack.unpackb(binary, encoding='utf-8', use_list=False, object_hook=decode_hook)

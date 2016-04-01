@@ -37,7 +37,7 @@ class Client(object):
         proto = self.req_proto if self.req_proto else JsonProto
         # encode to bytes
         logger.debug('encoding args: %s', req)
-        x = proto().encode(req)
+        x = proto().encode(req, is_req=True)
         logger.debug('encoded args: %s', x)
         return x
 
@@ -51,7 +51,7 @@ class Client(object):
         proto = self.req_proto if self.req_proto else JsonProto
         # decode bytes
         logger.debug('decoding resp: %s', resp_data)
-        resp = proto().decode(resp_data)
+        resp = proto().decode(resp_data, is_req=False)
         logger.debug('decoded resp: %s', resp)
         try:
             ret = resp.get('RET')

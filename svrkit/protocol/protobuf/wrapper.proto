@@ -1,0 +1,13 @@
+syntax = "proto3";
+package svrkit;
+import "google/protobuf/any.proto";
+
+message RequestWrapper {
+	repeated Any args = 1;
+	map<string, Any> kwargs = 2;
+}
+
+message ResponseWrapper {
+	uint32 RET = 1;
+	bytes DATA = 2;
+}

@@ -22,7 +22,7 @@ class JsonProto(Proto):
     def __init__(self):
         super().__init__()
 
-    def encode(self, data):
+    def encode(self, data, is_req=False):
         try:
             json_str = json.dumps(data, cls=ComplexEncoder)
             binary = json_str.encode('utf-8')
@@ -30,7 +30,7 @@ class JsonProto(Proto):
             raise ProtoEncodeException()
         return binary
 
-    def decode(self, binary):
+    def decode(self, binary, is_req=False):
         try:
             json_str = binary.decode('utf-8')
             data = json.loads(json_str)

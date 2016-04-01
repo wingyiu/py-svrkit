@@ -1,0 +1,2 @@
+msgpack-python==0.4.7
+protobuf==3.0.0b2.post2

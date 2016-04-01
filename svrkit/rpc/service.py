@@ -21,7 +21,7 @@ class Service(object):
     def _decode_input(self, input):
         logger.debug('decoding input: %s', input)
         proto = self.req_proto if self.req_proto else JsonProto
-        data = proto().decode(input)
+        data = proto().decode(input, is_req=True)
         logger.debug('decoded input: %s', data)
         return data
 
@@ -29,7 +29,7 @@ class Service(object):
         output = {'RET': ret, 'DATA': result}
         logger.debug('encoding ret and result: %s', output)
         proto = self.req_proto if self.req_proto else JsonProto
-        resp = proto().encode(output)
+        resp = proto().encode(output, is_req=False)
         logger.debug('encoded ret and result: %s', resp)
         return resp
 
@@ -56,6 +56,7 @@ class Service(object):
         kwargs = params['kwargs']
 
         # TODO 判断该method是否带有rpc decorator
+        # TODO 利用function anotations做参数类型判断或者参数转换,而不用decorator
         method = getattr(self, method_name, None)
         if method is None or not callable(method):  # or not has decorator rpc
             return self._encode_output(RET_UNSUPPORTED_METHOD, None)

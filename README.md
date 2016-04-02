@@ -14,23 +14,17 @@ something used in `Wechat`, which use an `seq_id` to selected server(`Load Balan
 ###1. write some methods on the sever side, and run it with a wsgi server
 
 ````
-import os
-import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-from svrkit.protocol.json import JsonProto
 from svrkit.protocol.msgpack import MsgpackProto
 from svrkit.server.wsgi import WsgiApplication
 from svrkit.rpc.service import Service
+from svrkit.rpc.decorator import rpc
 
 class DemoService(Service):
-    def __init__(self, prefix, req_proto, resp_proto):
-        super().__init__(prefix, req_proto, resp_proto)
-
-    def echo(self, words):
+    @rpc
+    def echo(self, words: str, times: int):
+        print(words)
+        print(times)
         return words
 
 service = DemoService('demo', req_proto=MsgpackProto, resp_proto=MsgpackProto)
@@ -50,12 +44,6 @@ if __name__ == '__main__':
 ###2. call these methods on client side like this
 
 ````
-import os
-import sys
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 from svrkit.rpc.client import Client
 from svrkit.protocol.msgpack import MsgpackProto
@@ -63,7 +51,7 @@ from svrkit.protocol.msgpack import MsgpackProto
 if __name__ == '__main__':
     client = Client('localhost', '8080', 'demo', MsgpackProto, MsgpackProto)
     import datetime
-    ret = client.echo(words= datetime.datetime.now())
+    ret = client.echo(words=datetime.datetime.now(), times='1000')
     print(ret)
 ````
 
@@ -71,17 +59,12 @@ if __name__ == '__main__':
 ### 1. server side
 
 ````
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 from svrkit.server.wsgi import WsgiApplication
+from svrkit.rpc.decorator import rpc
 
 class DemoSvrkitService(SvrkitService):
+    @rpc
     def echo(self, seq_id, words):
         return seq_id, words
 
@@ -101,12 +84,6 @@ if __name__ == '__main__':
 ### 2. client side
 
 ````
-import os
-import sys
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 from svrkit.client import SvrkitClient
 

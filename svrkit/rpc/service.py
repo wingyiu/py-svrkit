@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import inspect
 from svrkit.protocol.json import JsonProto
 from svrkit.protocol.exception import ProtoDecodeException
 from svrkit.rpc.define import *
@@ -55,15 +56,41 @@ class Service(object):
         args = params['args']
         kwargs = params['kwargs']
 
-        # TODO 判断该method是否带有rpc decorator
-        # TODO 利用function anotations做参数类型判断或者参数转换,而不用decorator
+        # 判断该method是否带有rpc decorator,没有rpc的方法不是可调用的
         method = getattr(self, method_name, None)
-        if method is None or not callable(method):  # or not has decorator rpc
+        if method is None or not callable(method) or not getattr(method, 'is_rpc', False):  # or not has decorator rpc
             return self._encode_output(RET_UNSUPPORTED_METHOD, None)
+
+        # 利用function annotations做参数类型判断或者参数转换,而不用decorator
+        sig = inspect.signature(method)
+        parameters = sig.parameters  # 参数有序字典
+        arg_names = tuple(parameters.keys())  # 参数名称
+
+        try:
+            args_conv = []
+            for i, value in enumerate(args):
+                arg_name = arg_names[i]
+                anno = parameters[arg_name].annotation
+                if anno:
+                    args_conv.append(anno(value))
+                else:
+                    args_conv.append(value)
+
+            kwargs_conv = {}
+            for arg_name, value in kwargs.items():
+                anno = parameters[arg_name].annotation
+                if anno:
+                    kwargs_conv[arg_name] = anno(value)
+                else:
+                    kwargs_conv[arg_name] = value
+        except ValueError:
+            return self._encode_output(RET_PARAMS_ERROR, None)
+        except:
+            return self._encode_output(RET_ERROR, None)
 
         try:
             # call method of service
-            result = method(*args, **kwargs)  #bounded method, no need to pass self
+            result = method(*args_conv, **kwargs_conv)  # bounded method, no need to pass self
             return self._encode_output(RET_OK, result)
         except TypeError:
             return self._encode_output(RET_PARAMS_ERROR, None)

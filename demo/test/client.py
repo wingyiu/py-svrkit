@@ -4,7 +4,7 @@ import sys
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 from svrkit.rpc.client import Client
 from svrkit.protocol.msgpack import MsgpackProto
@@ -12,6 +12,6 @@ from svrkit.protocol.msgpack import MsgpackProto
 if __name__ == '__main__':
     client = Client('localhost', '8080', 'demo', MsgpackProto, MsgpackProto)
     import datetime
-    ret = client.echo(words= datetime.datetime.now())
+    ret = client.echo(words= datetime.datetime.now(), times='1fasf')
     print(ret)
 

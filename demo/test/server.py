@@ -16,8 +16,8 @@ from demo.service import DemoService
 # list of service prefix and service class pair
 
 service = DemoService('demo',
-                      req_proto=MsgpackProto,
-                      resp_proto=MsgpackProto,
+                      req_proto=JsonProto,
+                      resp_proto=JsonProto,
                       )
 
 if __name__ == '__main__':

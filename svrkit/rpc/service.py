@@ -66,33 +66,40 @@ class Service(object):
         parameters = sig.parameters  # 参数有序字典
         arg_names = tuple(parameters.keys())  # 参数名称
 
+        # 尝试转换(如果已经是相同类型,则不转换)
         try:
             args_conv = []
             for i, value in enumerate(args):
                 arg_name = arg_names[i]
                 anno = parameters[arg_name].annotation
-                if anno:
-                    args_conv.append(anno(value))
+                if anno and not isinstance(value, anno):
+                        args_conv.append(anno(value))
                 else:
                     args_conv.append(value)
 
             kwargs_conv = {}
             for arg_name, value in kwargs.items():
                 anno = parameters[arg_name].annotation
-                if anno:
+                if anno and not isinstance(value, anno):
                     kwargs_conv[arg_name] = anno(value)
                 else:
                     kwargs_conv[arg_name] = value
-        except ValueError:
+        except ValueError as e:
+            logger.exception(e)
+            return self._encode_output(RET_PARAMS_ERROR, None)
+        except TypeError as e:
+            logger.exception(e)
             return self._encode_output(RET_PARAMS_ERROR, None)
         except:
             return self._encode_output(RET_ERROR, None)
 
         try:
-            # call method of service
+            # 调用服务的方法
             result = method(*args_conv, **kwargs_conv)  # bounded method, no need to pass self
             return self._encode_output(RET_OK, result)
-        except TypeError:
+        except TypeError as e:
+            logger.exception(e)
             return self._encode_output(RET_PARAMS_ERROR, None)
         except:
+            logger.error('call except')
             return self._encode_output(RET_ERROR, None)

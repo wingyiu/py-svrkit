@@ -15,6 +15,6 @@ from decimal import Decimal
 if __name__ == '__main__':
     client = Client('localhost', '8080', 'demo', JsonProto, JsonProto)
     import datetime
-    ret = client.echo(dt= datetime.date.today(), times=Decimal('0.000001'))
+    ret = client.echo(dt= datetime.date.today(), times=b'0.000001')
     print(ret)
 

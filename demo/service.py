@@ -7,7 +7,7 @@ from decimal import Decimal
 
 class DemoService(Service):
     @rpc
-    def echo(self, dt: date, times: Decimal):
+    def echo(self, dt: date, times: bytearray):
         print(dt)
         print(times)
         return times

@@ -3,6 +3,7 @@ import json
 import datetime
 import decimal
 import uuid
+import base64
 
 from svrkit.protocol.tz_util import utc
 from svrkit.protocol.base import Proto
@@ -13,7 +14,7 @@ class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
         if hasattr(obj, 'items'):  # kw
             return dict(((k, self.default(v)) for k, v in iter(obj)))
-        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes)):  # iterable but not str or bytes
+        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):  # iterable but not str or bytes
             return list((self.default(v) for v in obj))
         elif isinstance(obj, datetime.datetime):
             return {'__datetime__': obj.strftime('%Y-%m-%d %H:%M:%S.%f%z')}
@@ -23,6 +24,8 @@ class ComplexEncoder(json.JSONEncoder):
             return {'__decimal__': str(obj)}
         elif isinstance(obj, uuid.UUID):
             return {"__uuid__": obj.hex}
+        elif isinstance(obj, (bytes, bytearray)):
+            return {'__bytes__': base64.b64encode(obj).decode()}
         else:
             return json.JSONEncoder.default(self, obj)
 
@@ -58,8 +61,10 @@ def object_hook(dct):
             return aware.replace(tzinfo=datetime.timezone(datetime.timedelta(seconds=secs)))
     elif '__decimal__' in dct:
         return decimal.Decimal(dct["__decimal__"])
-    elif "__uuid__" in dct:
+    elif '__uuid__' in dct:
         return uuid.UUID(dct["__uuid__"])
+    elif '__bytes__' in dct:
+        return bytes(base64.b64decode(dct['__bytes__'].encode()))
     return dct
 
 

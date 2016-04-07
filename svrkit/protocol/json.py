@@ -4,16 +4,17 @@ import datetime
 import decimal
 import uuid
 import base64
-
 from svrkit.protocol.tz_util import utc
 from svrkit.protocol.base import Proto
 from svrkit.protocol.exception import ProtoDecodeException, ProtoEncodeException
 
-class ComplexEncoder(json.JSONEncoder):
 
+class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
         if hasattr(obj, 'items'):  # kw
-            return dict(((k, self.default(v)) for k, v in iter(obj)))
+            return dict(((k, self.default(v)) for k, v in obj.items()))
+        elif hasattr(obj, '__dict__'):
+            return self.default(obj.__dict__)
         elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):  # iterable but not str or bytes
             return list((self.default(v) for v in obj))
         elif isinstance(obj, datetime.datetime):
@@ -27,7 +28,7 @@ class ComplexEncoder(json.JSONEncoder):
         elif isinstance(obj, (bytes, bytearray)):
             return {'__bytes__': base64.b64encode(obj).decode()}
         else:
-            return json.JSONEncoder.default(self, obj)
+            return obj
 
 
 def object_hook(dct):

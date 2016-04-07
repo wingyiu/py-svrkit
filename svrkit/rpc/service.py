@@ -72,7 +72,7 @@ class Service(object):
             for i, value in enumerate(args):
                 arg_name = arg_names[i]
                 anno = parameters[arg_name].annotation
-                if anno and not isinstance(value, anno):
+                if anno is not inspect._empty and not isinstance(value, anno):
                         args_conv.append(anno(value))
                 else:
                     args_conv.append(value)
@@ -80,7 +80,7 @@ class Service(object):
             kwargs_conv = {}
             for arg_name, value in kwargs.items():
                 anno = parameters[arg_name].annotation
-                if anno and not isinstance(value, anno):
+                if anno is not inspect._empty and not isinstance(value, anno):
                     kwargs_conv[arg_name] = anno(value)
                 else:
                     kwargs_conv[arg_name] = value
